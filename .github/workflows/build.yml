@@ -58,7 +58,7 @@ jobs:
       - name: Set Android app label
         run: |
           MANIFEST=android/app/src/main/AndroidManifest.xml
-          sed -i 's|android:label="eye_pair_app"|android:label="SBP Eye Settings"|' $MANIFEST
+          sed -i 's|android:label="eye_pair_app"|android:label="SBP Eye App OLED"|' $MANIFEST
           grep 'android:label' $MANIFEST
 
       - name: Build APK
@@ -108,9 +108,9 @@ jobs:
       - name: Set iOS display name
         run: |
           PLIST=ios/Runner/Info.plist
-          /usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName 'SBP Eye Settings'" $PLIST || \
-            /usr/libexec/PlistBuddy -c "Add :CFBundleDisplayName string 'SBP Eye Settings'" $PLIST
-          /usr/libexec/PlistBuddy -c "Set :CFBundleName 'SBP Eye Settings'" $PLIST || true
+          /usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName 'SBP Eye App OLED'" $PLIST || \
+            /usr/libexec/PlistBuddy -c "Add :CFBundleDisplayName string 'SBP Eye App OLED'" $PLIST
+          /usr/libexec/PlistBuddy -c "Set :CFBundleName 'SBP Eye App OLED'" $PLIST || true
           /usr/libexec/PlistBuddy -c "Print :CFBundleDisplayName" $PLIST
 
       - name: Build iOS unsigned

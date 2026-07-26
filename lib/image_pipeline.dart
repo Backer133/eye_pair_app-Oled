@@ -1,16 +1,16 @@
-// PNG -> 466x466 RGB565 Konvertierung fuer Cloud-Eye-Upload via BLE.
-// Zielgeraet: ESP32-C6-Touch-AMOLED-1.43 (CO5300, 466x466). Der esp_lcd_sh8601-Treiber
+// PNG -> 546x546 RGB565 Konvertierung fuer Cloud-Eye-Upload via BLE.
+// Zielgeraet: ESP32-C6-Touch-AMOLED-1.43 (CO5300, 546x546). Der esp_lcd_sh8601-Treiber
 // schickt die Bytes unveraendert ans Panel und die Firmware nutzt LV_COLOR_16_SWAP=1
 // -> RGB565 muss BIG-ENDIAN sein (high-byte zuerst).
 
 import 'dart:typed_data';
 import 'package:image/image.dart' as img;
 
-const int kEyeWidth  = 466;
-const int kEyeHeight = 466;
-const int kRgb565ByteCount = kEyeWidth * kEyeHeight * 2;  // 434312 Bytes
+const int kEyeWidth  = 546;   // wie die eingebauten Augen (1:1 gezoomt, formatfuellend)
+const int kEyeHeight = 546;
+const int kRgb565ByteCount = kEyeWidth * kEyeHeight * 2;  // 596232 Bytes
 
-/// Decodiert PNG/JPG, resized auf 466x466, konvertiert zu RGB565 BE.
+/// Decodiert PNG/JPG, resized auf 546x546, konvertiert zu RGB565 BE.
 /// Bild wird unveraendert uebertragen - keine Hintergrund-Konvertierung.
 /// Tipp: PNG bitte direkt mit weissem Hintergrund hochladen (Display ist weiss).
 Uint8List pngToRgb565(Uint8List pngBytes) {
