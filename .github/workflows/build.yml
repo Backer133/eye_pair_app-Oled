@@ -27,10 +27,10 @@ jobs:
           channel: 'stable'
 
       - name: Init plattform-spezifische Templates
-        # --org at.sbp  =>  applicationId "at.sbp.eye_pair_app".
-        # Bewusst anders als die alte App (com.example.eye_pair_app), damit beide
-        # Versionen parallel auf dem Handy installiert bleiben koennen.
-        run: flutter create . --platforms=android,ios --org at.sbp --project-name=eye_pair_app
+        # --org at.sbp + project-name eye_pair_app_oled => applicationId "at.sbp.eye_pair_app_oled".
+        # EIGENER applicationId (nicht at.sbp.eye_pair_app), damit die OLED-App PARALLEL zur
+        # anderen App (eye_pair_app_new_screens_cheaper) auf dem Handy installiert bleiben kann.
+        run: flutter create . --platforms=android,ios --org at.sbp --project-name=eye_pair_app_oled
 
       - name: Install deps
         run: flutter pub get
@@ -58,8 +58,20 @@ jobs:
       - name: Set Android app label
         run: |
           MANIFEST=android/app/src/main/AndroidManifest.xml
-          sed -i 's|android:label="eye_pair_app"|android:label="SBP Eye App OLED"|' $MANIFEST
+          # robust: beliebigen android:label-Wert (Default = Projektname) durch den Anzeigenamen ersetzen
+          sed -i 's|android:label="[^"]*"|android:label="SBP Eye App OLED"|' $MANIFEST
           grep 'android:label' $MANIFEST
+
+      - name: Setup Release-Signatur (fester Keystore -> Updates ohne Neuinstallation)
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          KS_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_B64" ]; then echo "Kein Keystore-Secret -> Debug-Signatur (Fallback)"; exit 0; fi
+          echo "$KEYSTORE_B64" | base64 -d > android/app/release.p12
+          printf 'storeFile=release.p12\nstorePassword=%s\nkeyAlias=sbp\nkeyPassword=%s\n' "$KS_PASS" "$KS_PASS" > android/key.properties
+          python3 ci/patch_signing.py
+          echo "=== signingConfig ==="; grep -nE "signingConfig|storeFile|keyAlias" android/app/build.gradle.kts || true
 
       - name: Build APK
         run: flutter build apk --release
@@ -92,10 +104,10 @@ jobs:
           channel: 'stable'
 
       - name: Init Templates
-        # --org at.sbp  =>  applicationId "at.sbp.eye_pair_app".
-        # Bewusst anders als die alte App (com.example.eye_pair_app), damit beide
-        # Versionen parallel auf dem Handy installiert bleiben koennen.
-        run: flutter create . --platforms=android,ios --org at.sbp --project-name=eye_pair_app
+        # --org at.sbp + project-name eye_pair_app_oled => applicationId "at.sbp.eye_pair_app_oled".
+        # EIGENER applicationId (nicht at.sbp.eye_pair_app), damit die OLED-App PARALLEL zur
+        # anderen App (eye_pair_app_new_screens_cheaper) auf dem Handy installiert bleiben kann.
+        run: flutter create . --platforms=android,ios --org at.sbp --project-name=eye_pair_app_oled
 
       - name: Install deps
         run: flutter pub get
