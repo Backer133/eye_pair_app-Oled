@@ -1,6 +1,7 @@
 // PNG -> 466x466 RGB565 Konvertierung fuer Cloud-Eye-Upload via BLE.
-// Zielgeraet: ESP32-S3-Touch-AMOLED-1.43 (CO5300, 466x466). LVGL erwartet little-endian
-// RGB565: low-byte zuerst.
+// Zielgeraet: ESP32-C6-Touch-AMOLED-1.43 (CO5300, 466x466). Der esp_lcd_sh8601-Treiber
+// schickt die Bytes unveraendert ans Panel und die Firmware nutzt LV_COLOR_16_SWAP=1
+// -> RGB565 muss BIG-ENDIAN sein (high-byte zuerst).
 
 import 'dart:typed_data';
 import 'package:image/image.dart' as img;
@@ -9,7 +10,7 @@ const int kEyeWidth  = 466;
 const int kEyeHeight = 466;
 const int kRgb565ByteCount = kEyeWidth * kEyeHeight * 2;  // 434312 Bytes
 
-/// Decodiert PNG/JPG, resized auf 466x466, konvertiert zu RGB565 LE.
+/// Decodiert PNG/JPG, resized auf 466x466, konvertiert zu RGB565 BE.
 /// Bild wird unveraendert uebertragen - keine Hintergrund-Konvertierung.
 /// Tipp: PNG bitte direkt mit weissem Hintergrund hochladen (Display ist weiss).
 Uint8List pngToRgb565(Uint8List pngBytes) {
@@ -34,9 +35,9 @@ Uint8List pngToRgb565(Uint8List pngBytes) {
       final g6 = (g >> 2) & 0x3F;
       final b5 = (b >> 3) & 0x1F;
       final v = (r5 << 11) | (g6 << 5) | b5;
-      // little-endian
-      out[o++] = v & 0xFF;
+      // big-endian (high-byte zuerst) -> passend zu LV_COLOR_16_SWAP=1 / esp_lcd_sh8601
       out[o++] = (v >> 8) & 0xFF;
+      out[o++] = v & 0xFF;
     }
   }
   return out;
