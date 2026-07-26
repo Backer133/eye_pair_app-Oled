@@ -69,7 +69,6 @@ jobs:
         run: |
           if [ -z "$KEYSTORE_B64" ]; then echo "Kein Keystore-Secret -> Debug-Signatur (Fallback)"; exit 0; fi
           echo "$KEYSTORE_B64" | base64 -d > android/app/release.p12
-          printf 'storeFile=release.p12\nstorePassword=%s\nkeyAlias=sbp\nkeyPassword=%s\n' "$KS_PASS" "$KS_PASS" > android/key.properties
           python3 ci/patch_signing.py
           echo "=== signingConfig ==="; grep -nE "signingConfig|storeFile|keyAlias" android/app/build.gradle.kts || true
 
