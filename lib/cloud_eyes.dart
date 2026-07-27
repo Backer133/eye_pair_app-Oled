@@ -19,7 +19,9 @@ class CloudEye {
 }
 
 class GithubCloudEyes {
-  static const String repo = 'Backer133/eye-pair-app';
+  // Eigenes OLED-Repo: der cloud-eyes/ Ordner DIESES Repos ist die Augen-Quelle.
+  // Neue Augen einfach nach cloud-eyes/ pushen -> App listet sie live via GitHub Contents API.
+  static const String repo = 'Backer133/eye_pair_app-Oled';
   static const String path = 'cloud-eyes';
   static const String branch = 'main';
 
