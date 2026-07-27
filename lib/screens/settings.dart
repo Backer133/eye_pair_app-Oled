@@ -15,6 +15,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
   // App-Version (aus dem Paket -> folgt automatisch der pubspec-Version).
   String _version = '';
 
+  // Helligkeit: lokaler Slider-Wert (waehrend des Ziehens) + Throttle fuers BLE-Schreiben.
+  double? _brightnessLocal;
+  DateTime _lastBrWrite = DateTime.fromMillisecondsSinceEpoch(0);
+  void _throttledBrightness(double v) {
+    final now = DateTime.now();
+    if (now.difference(_lastBrWrite).inMilliseconds >= 120) {
+      _lastBrWrite = now;
+      widget.ble.setBrightness(v.round());
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -109,6 +120,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       builder: (context, _) {
         final ble = widget.ble;
         final animOn = ble.animEnabled == 1;
+        final br = (_brightnessLocal ?? ble.brightness.toDouble()).clamp(5.0, 255.0);
         return ListView(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
           children: [
@@ -143,6 +155,42 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 value: animOn,
                 activeColor: kAccent,
                 onChanged: (v) => ble.setAnimEnabled(v),
+              ),
+            ),
+
+            // Helligkeit (AMOLED: CO5300 0x51)
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 6),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        _iconBox(Icons.brightness_6_outlined, kAccentGlow),
+                        const SizedBox(width: 12),
+                        const Expanded(
+                          child: Text('Helligkeit',
+                              style: TextStyle(fontWeight: FontWeight.w700)),
+                        ),
+                        Text('${(br / 255 * 100).round()} %',
+                            style: const TextStyle(
+                                color: kAccent, fontWeight: FontWeight.w700)),
+                      ],
+                    ),
+                    Slider(
+                      min: 5,
+                      max: 255,
+                      value: br,
+                      activeColor: kAccent,
+                      onChanged: (v) {
+                        setState(() => _brightnessLocal = v);
+                        _throttledBrightness(v);   // live dimmen (gedrosselt)
+                      },
+                      onChangeEnd: (v) => ble.setBrightness(v.round()),
+                    ),
+                  ],
+                ),
               ),
             ),
 

@@ -315,7 +315,15 @@ class EyeBle extends ChangeNotifier {
     eyeId = id; notifyListeners();
   }
 
-  // setBrightness entfernt - Funktioniert auf ESP32-C3 mit Arduino Core 2.x nicht zuverlaessig.
+  // Display-Helligkeit 0..255 (AMOLED: CO5300-Kommando 0x51 in der Firmware).
+  // Auf dem C6-AMOLED zuverlaessig (anders als frueher auf dem C3).
+  Future<void> setBrightness(int val) async {
+    if (locked) return;
+    final c = _chars[EyeUuids.chrBrightness]; if (c == null) return;
+    final v = val.clamp(0, 255);
+    await c.write([v], withoutResponse: false);
+    brightness = v; notifyListeners();
+  }
 
   Future<void> setAnimEnabled(bool en) async {
     if (locked) return;
